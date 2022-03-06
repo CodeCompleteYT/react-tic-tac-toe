@@ -1,28 +1,30 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 
-import {Board} from "./components/Board"
-import {ScoreBoard} from "./components/ScoreBoard"
+import { Board } from "./components/Board";
+import { ResetButton } from "./components/ResetButton";
+import { ScoreBoard } from "./components/ScoreBoard";
 import './App.css';
 
 const App = () => {
 
   const WIN_CONDITIONS = [
-    [0,1,2],
-    [3,4,5],
-    [6,7,8],
-    [0,3,6],
-    [1,4,7],
-    [2,5,8],
-    [0,4,8],
-    [2,4,6]
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
   ]
 
   const [xPlaying, setXPlaying] = useState(true);
   const [history, setHistory] = useState(Array(9).fill(null))
-  const [wins, setWins] = useState({xWins : 0, oWins : 0})
+  const [scores, setScores] = useState({ xScore: 0, oScore: 0 })
   const [gameOver, setGameOver] = useState(false);
 
   const handleBoxClick = (boxIdx) => {
+    // Step 1: Update the history and board
     const updatedHistory = history.map((value, idx) => {
       if (idx === boxIdx) {
         return xPlaying ? "X" : "O";
@@ -32,29 +34,32 @@ const App = () => {
     })
 
     setHistory(updatedHistory);
-    
+
+    // Step 2: Check if either player has won the game
     const winner = checkWinner(updatedHistory);
 
     if (winner) {
-      if(winner === "O") {
-        let {oWins} = wins;
-        oWins += 1;
-        setWins({...wins, oWins})
+      if (winner === "O") {
+        let { oScore } = scores;
+        oScore += 1;
+        setScores({ ...scores, oScore })
       } else {
-        let {xWins} = wins;
-        xWins += 1;
-        setWins({...wins, xWins})
+        let { xScore } = scores;
+        xScore += 1;
+        setScores({ ...scores, xScore })
       }
     }
 
+    // Step 3: Change active player
     setXPlaying(!xPlaying);
   }
 
   const checkWinner = (history) => {
-    for(let i = 0; i < WIN_CONDITIONS.length; i++) {
+    for (let i = 0; i < WIN_CONDITIONS.length; i++) {
       const [x, y, z] = WIN_CONDITIONS[i];
 
-      if(history[x] && history[x] === history[y] && history[y] === history[z]) {
+      // Iterate through win conditions and check if either player satisfies them
+      if (history[x] && history[x] === history[y] && history[y] === history[z]) {
         setGameOver(true);
         return history[x];
       }
@@ -68,9 +73,9 @@ const App = () => {
 
   return (
     <div className="App">
-      <ScoreBoard scores={wins} xPlaying={xPlaying}/>
-      <Board board={history} handleBoxClick={gameOver ? resetBoard : handleBoxClick}/>
-      <button className="reset-btn" onClick={resetBoard}>Reset</button>
+      <ScoreBoard scores={scores} xPlaying={xPlaying} />
+      <Board board={history} onClick={gameOver ? resetBoard : handleBoxClick} />
+      <ResetButton resetBoard={resetBoard} />
     </div>
   );
 }
